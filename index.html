@@ -1,131 +1,216 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
+        <script src="airtable.browser.js"></script>
+        <!-- CSS only -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+          <div id="page-0">
+            <h1 id="header-company"></h1>
+            <h3 id="sub-head"></h3>
+            <div class="row">
+              <div class="col">
+                <table id="basicInfo" class="table">
+                  <tbody>
+                    <tr>
+                      <th scope="row">Contact</th>
+                      <td id="table-contact"></td>
+                    </tr>
+                      <tr>
+                        <th scope="row">Email</th>
+                        <td id="table-email"></td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Phone</th>
+                        <td id="table-phone"></td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Website</th>
+                        <td id="table-website"></td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Headquarters</th>
+                        <td id="table-hq"></td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Team Size</th>
+                        <td id="table-teamSize"></td>
+                      </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="col">
+                <strong>About Us</strong>
+                <p id="serviceProvided">Column</p>
+              </div>
+            </div>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-</head>
-
-<body>
-  <main class="container">
-    <div id="app">
-      <h1>{{ title }}</h1>
-
-      <div v-for="(item, index) in items">
-        <div v-for="element in item">
-          <div v-bind:class="element.style">
-            <tag v-if="element.style == 'img'" :is="element.style" v-bind:src="element.content"></tag>
-            <tag v-else-if="element.style !== 'img'" :is="element.style">{{ element.content }}</tag>
+            <div id="check-info" class="row">
+              <div class="col">
+                <table id="basicInfo" class="table">
+                  <tbody>
+                    <tr>
+                      <th scope="row">Availability to Demo</th>
+                      <td id="table-demo"></td>
+                      <th scope="row">Availability to visit location</th>
+                        <td id="table-visit"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Pilot Cost (estimate)</th>
+                      <td id="table-pilot-cost"></td>
+                      <th scope="row">Annual Cost (estimate)</th>
+                      <td id="table-annual-cost"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Case Study/Deck</th>
+                      <td id="case-study-deck"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div id="mainInfo" class="row">
+              <h3>Proposed Solution</h3>
+              <p id="proposed-solution"></p>
+              <h3>How this will help achieve the Challenge outcomes</h3>
+              <p id="product-challenge-fit"></p>
+              <h3>Will you be creating a new product for this challenge?</h3>
+              <p id="new-existing"></p>
+              <h3> What makes your team qualified to work on this Challenge?</h3>
+              <p id="team-qual"></p>
+              <h3>Any Conlifcts of Interest?</h3>
+              <p id="coi"></p>
+            </div>
           </div>
+
         </div>
-        <div v-if="index % 4 == 3" class="break"></div>
-        <div v-else-if="index % 4 !== 3" class=""></div>
+        
 
-      </div>
-    </div>
-  </main>
-
-  <script>
-    Vue.component('tag', {
-      props: {
-        is: {
-          type: String,
-          required: true
-        }
-      },
-      render(h) {
-        return h(this.tag, this.$slots.default)
-      }
-    })
-
-    var app = new Vue({
-      el: '#app',
-      data: {
-        title: 'ENTER H1 PAGE TITLE HERE',
-        items: []
-      },
-      mounted: function() {
-        this.loadItems();
-      },
-      methods: {
-        loadItems: function() {
-          var app_id = 'YOUR APP ID HERE';
-          var api_key = 'YOUR API KEY HERE';
-          var table = 'YOUR TABLE NAME HERE';
-          var view = 'YOUR VIEW NAME HERE';
-          var record_fields = [YOUR ARRAY OF FIELD NAMES HERE]
+        <hr/>
+        <button id='next'>Next</button>
+    </body>
 
 
-          var self = this
-          this.items = []
-          axios.get(
-            "https://api.airtable.com/v0/" + app_id + "/" + table + "?maxRecords=100&view=" + view, {
-              headers: {
-                Authorization: "Bearer " + api_key
+    <script>
+var Airtable = require('airtable');
+// Get a base ID for an instance of art gallery example
+var base = new Airtable({ apiKey: 'KEY' }).base('KEY');
+
+var page = 0,
+    currentPage = 0;
+
+var loadCurrentGov = function() {
+    $('#StartupPDF').empty();
+
+    base('Challenge Responses').select({
+         // Selecting the first 3 records in Grid view:
+          maxRecords: 100,
+          view: "Current Gov"
+    }).eachPage(function page(records, fetchNextPage) {
+        records.forEach(function(record) {
+
+//Currently runs forEach, which means it will overwrite itself until the last record in the view CurrentGov. To fix this, would need to actually create the html for all the records you want, then assign a button to iterate over them "next" and "back", which will increase or decreas currentPage.
+            console.log('Retrieved ', record.get('Name'));
+
+            $('#header-company').text(record.get('Company'));
+            $('#sub-head').text('Submitting to challenge number ' + record.get('Challenge ID') + ' for ' + record.get('Local Government'));
+
+            $('#table-contact').text(record.get('Contact Name'));
+            $('#table-email').text(record.get('Contact Email'));
+            $('#table-phone').text(record.get('Contact Phone Number'));
+            $('#table-website').text(record.get('Company Website'));
+            $('#table-hq').text(record.get('Startup HQ'));
+            $('#table-teamSize').text(record.get('Team Size'));
+
+
+            $('#serviceProvided').html(record.get('Service Provided'));
+
+           
+
+            $('#table-demo').text(record.get('Availability for Demo'));
+            $('#table-visit').text(record.get('Visit Location'));
+            $('#table-pilot-cost').text(record.get('Estimated Cost Pilot'));
+            $('#table-annual-cost').text(record.get('Estimated Cost Annual Contract'));
+            
+            var $caseStudy = 'n/a';
+            var caseStudyArray = record.get('Case Studies/Deck');
+            console.log(caseStudyArray);
+            if(caseStudyArray!=undefined){
+              $caseStudy = $('<div>');
+              for(let i=0; i<caseStudyArray.length; i++){
+                console.log(caseStudyArray[i].url);
+                var tempAnchor = '<a href="' + caseStudyArray[i].url + '">Attachment ' + i+1 + '</a>'; 
+                $caseStudy.append(tempAnchor);
               }
-            }
-          ).then(function(response) {
-            var data = response.data.records;
-            var i;
-            var output = [];
-            for (i = 0; i < data.length; i++) {
-              object = []
-              for (j = 0; j < record_fields.length; j++) {
-                var c = data[i].fields[record_fields[j]]
-                var s = data[i].fields[record_fields[j] + 'Styling']
-                if (s == 'img') {
-                  content = c[0].url;
-                } else {
-                  content = c;
-                }
-                element = {
-                  content: content,
-                  style: s
-                }
-                object.push(element);
-              }
-              output.push(object);
-            }
-            self.items = output;
-          }).catch(function(error) {
-            console.log(error)
-          })
+            };
+
+            $('#case-study-deck').html($caseStudy);
+
+            $('#proposed-solution').text(record.get('Proposed Solution'));
+            $('#product-challenge-fit').text(record.get('Product/Challenge Fit'));
+            $('#new-existing').text(record.get('New or Existing product?'));
+            $('#team-qual').text(record.get('Team Qualifications'));
+            $('#coi').text(record.get('Conflicts of Interest'));
+
+
+
+           //$('#startupPDF').append($startupInfo);
+           page++;
+        });
+
+        fetchNextPage();
+    }, function done(error) {
+        console.log(error);
+    });
+};
+
+/*
+var deleteArtist = function(record) {
+    record.destroy(function(err) {
+        if (err) {
+            console.log('Error destroying ', recordId, err);
+        } else {
+            console.log('Destroyed ', record.getId());
+            $('div[data-record-id="'+record.getId()+'"]').remove();
         }
-      }
-    })
-  </script>
+    });
+};
 
-  <style media="all">
-    img {
-      width: 100px;
-    }
+var loadArtists = function() {
+    $('#artists').empty();
 
-    .container {
-      margin-top: 20px;
-    }
+    base('Artists').select({
+        sort: [
+            {field: 'Name', direction: 'asc'}
+        ]
+    }).eachPage(function page(records, fetchNextPage) {
+        records.forEach(function(record) {
+            console.log('Retrieved ', record.get('Name'));
 
-    h1 {
-      margin-bottom: 30px;
-    }
+            var $artistInfo = $('<div>');
+            $artistInfo.append($('<h3>').text(record.get('Name')));
+            $artistInfo.append($('<div>').text(record.get('Bio')));
+            var x = $('<button>').text('Delete').click(function() {
+                deleteArtist(record);
+            });
+            $artistInfo.append(x)
+            $artistInfo.attr('data-record-id', record.getId());
 
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    img {
-      margin-bottom: 10px;
-    }
+            $('#artists').append($artistInfo);
+        });
 
-    .break {
-      page-break-after: always;
-    }
-  </style>
+        fetchNextPage();
+    }, function done(error) {
+        console.log(error);
+    });
+};
+*/  
 
-</body>
+loadCurrentGov();
 
+</script>
 </html>
